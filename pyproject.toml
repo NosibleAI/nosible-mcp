@@ -1,0 +1,10 @@
+[project]
+name = "nosible-mcp"
+version = "0.0.1"
+description = "MCP server for the NOSIBLE search API"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "httpx>=0.28.1",
+    "mcp[cli]>=1.13.1",
+]
