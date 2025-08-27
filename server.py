@@ -1,63 +1,44 @@
-
-
-from auth import AuthMiddleware
-from config import settings
-
-import os
-
-if settings.NOSIBLE_API_KEY:
-    os.environ["NOSIBLE_API_KEY"] = settings.NOSIBLE_API_KEY
-
+# server.py
 import contextlib
-import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from nosible_mcp import mcp as nosible_mcp_server
+from config import settings
+from auth import AuthMiddleware
+from nosible_mcp import mcp
 
-# Create a combined lifespan to manage the MCP session manager
+# Create the Streamable HTTP sub-app and mount at /mcp
+mcp_app = mcp.streamable_http_app()  # returns a Starlette app
+
 @contextlib.asynccontextmanager
-async def lifespan(app: FastAPI):
-    async with nosible_mcp_server.session_manager.run():
+async def lifespan(_: FastAPI):
+    async with mcp.session_manager.run():
         yield
 
 app = FastAPI(lifespan=lifespan)
 
-# Add CORS middleware
+# CORS + expose session header (per MCP Streamable HTTP spec)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify your actual origins
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_origins=["*"],
     allow_headers=["*"],
+    allow_methods=["*"],
     expose_headers=["Mcp-Session-Id"],
 )
 
-# MCP well-known endpoint
+# OAuth protection
+app.add_middleware(AuthMiddleware)
+
+# OAuth 2.1 protected resource metadata (well-known)
 @app.get("/.well-known/oauth-protected-resource/mcp")
-async def oauth_protected_resource_metadata():
-    """
-    OAuth 2.0 Protected Resource Metadata endpoint for MCP client discovery.
-    Required by the MCP specification for authorization server discovery.
-    """
+def discovery():
     return {
         "authorization_servers": [settings.SCALEKIT_AUTHORIZATION_SERVERS],
         "bearer_methods_supported": ["header"],
-        "resource": settings.SCALEKIT_RESOURCE_NAME,
+        "resource": settings.SCALEKIT_RESOURCE_NAME,      # MUST match what you register in ScaleKit
         "resource_documentation": settings.SCALEKIT_RESOURCE_DOCS_URL,
-        "scopes_supported": [
-          "mcp:tools:search"
-        ],
+        "scopes_supported": ["mcp:tools:search"],
     }
 
-# Create and mount the MCP server with authentication
-mcp_server = nosible_mcp_server.streamable_http_app()
-app.add_middleware(AuthMiddleware)
-app.mount("/", mcp_server)
-
-def main():
-    """Main entry point for the MCP server."""
-    uvicorn.run(app, host="localhost", port=settings.PORT, log_level="debug")
-
-if __name__ == "__main__":
-    main()
+# Mount MCP app under /mcp/  (note the trailing slash discipline)
+app.mount("/mcp", mcp_app)

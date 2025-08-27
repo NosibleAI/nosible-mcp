@@ -1,80 +1,74 @@
-import json
-import logging
+# auth.py
+import json, logging
 from fastapi import HTTPException, Request
-from fastapi.security import HTTPBearer
 from fastapi.responses import JSONResponse
+from fastapi.security import HTTPBearer
+from starlette.middleware.base import BaseHTTPMiddleware
+
 from scalekit import ScalekitClient
 from scalekit.common.scalekit import TokenValidationOptions
-from starlette.middleware.base import BaseHTTPMiddleware
 
 from config import settings
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
 logger = logging.getLogger(__name__)
-
-# Security scheme for Bearer token
 security = HTTPBearer()
 
-# Initialize ScaleKit client
 scalekit_client = ScalekitClient(
     settings.SCALEKIT_ENVIRONMENT_URL,
     settings.SCALEKIT_CLIENT_ID,
-    settings.SCALEKIT_CLIENT_SECRET
+    settings.SCALEKIT_CLIENT_SECRET,
 )
 
+WHITELIST_PREFIXES = (
+    "/.well-known/",
+)
 
-# Authentication middleware
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        if request.url.path.startswith("/.well-known/"):
+        # Public discovery endpoint
+        if any(request.url.path.startswith(p) for p in WHITELIST_PREFIXES):
             return await call_next(request)
 
-        try:
-            auth_header = request.headers.get("Authorization")
-            if not auth_header or not auth_header.startswith("Bearer "):
-                raise HTTPException(status_code=401, detail="Missing or invalid authorization header")
+        # Dev bypass (handy while wiring)
+        if settings.ALLOW_DEV_NOAUTH:
+            return await call_next(request)
 
-            token = auth_header.split(" ")[1]
-
-            request_body = await request.body()
-
-            # Parse JSON from bytes
-            try:
-                request_data = json.loads(request_body.decode('utf-8'))
-            except (json.JSONDecodeError, UnicodeDecodeError):
-                request_data = {}
-
-            validation_options = TokenValidationOptions(
-                issuer=settings.SCALEKIT_ENVIRONMENT_URL,
-                audience=[settings.SCALEKIT_AUDIENCE_NAME],
+        # Expect Bearer token from OAuth-capable clients (or via mcp-remote)
+        auth_header = request.headers.get("Authorization")
+        if not auth_header or not auth_header.startswith("Bearer "):
+            return JSONResponse(
+                status_code=401,
+                content={"error": "unauthorized", "error_description": "Missing or invalid authorization header"},
+                headers={
+                    "WWW-Authenticate": f'Bearer realm="OAuth", resource_metadata="{settings.SCALEKIT_RESOURCE_NAME.rstrip("/").replace("/mcp","")}/.well-known/oauth-protected-resource/mcp"'
+                },
             )
 
-            is_tool_call = request_data.get("method") == "tools/call"
+        token = auth_header.split(" ", 1)[1]
+
+        # Optionally enforce scope when the request is a tools/call
+        try:
+            body = await request.body()
+            payload = {}
+            try:
+                payload = json.loads(body.decode("utf-8")) if body else {}
+            except Exception:
+                payload = {}
 
             required_scopes = []
-            if is_tool_call:
-                required_scopes = ["mcp:tools:search"]  # get required scope for your tool
-                validation_options.required_scopes = required_scopes
+            if payload.get("method") == "tools/call":
+                required_scopes = ["mcp:tools:search"]
 
-            try:
-                scalekit_client.validate_token(token, options=validation_options)
-            #     validate_access_token
-
-            except Exception as e:
-                raise HTTPException(status_code=401, detail="Token validation failed")
-
-        except HTTPException as e:
+            opts = TokenValidationOptions(
+                issuer=settings.SCALEKIT_ENVIRONMENT_URL,
+                audience=[settings.SCALEKIT_RESOURCE_NAME],
+                required_scopes=required_scopes or None,
+            )
+            scalekit_client.validate_access_token(token, options=opts)
+        except Exception:
             return JSONResponse(
-                status_code=e.status_code,
-                content={"error": "unauthorized" if e.status_code == 401 else "forbidden",
-                         "error_description": e.detail},
-                headers={
-                    "WWW-Authenticate": f'Bearer realm="OAuth", resource_metadata="{settings.SCALEKIT_RESOURCE_METADATA_URL}"'
-                }
+                status_code=401,
+                content={"error": "unauthorized", "error_description": "Token validation failed"},
             )
 
         return await call_next(request)
