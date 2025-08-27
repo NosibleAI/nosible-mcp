@@ -73,7 +73,7 @@ def search(query: str) -> Dict[str, Any]:   # <-- JSON-friendly type
     logging.warning("tool sees NOSIBLE_API_KEY? %s", bool(os.getenv("NOSIBLE_API_KEY")))
     importlib.reload(_nosible)  # safe against early import
 
-    with Nosible() as nos:
+    with Nosible(nosible_api_key=API_KEY) as nos:
         rs = nos.fast_search(question=query, n_results=10)
 
     # normalize to JSON-serializable dict
