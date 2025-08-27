@@ -21,3 +21,8 @@ Example with my dir path, replace with your own:
   }
 }
 ```
+
+Run with inspector:
+```commandline
+uv run mcp dev nosible_mcp.py:mcp  
+```

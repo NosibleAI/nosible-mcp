@@ -1,11 +1,18 @@
 
+
+from auth import AuthMiddleware
+from config import settings
+
+import os
+
+if settings.NOSIBLE_API_KEY:
+    os.environ["NOSIBLE_API_KEY"] = settings.NOSIBLE_API_KEY
+
 import contextlib
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from auth import AuthMiddleware
-from config import settings
 from nosible_mcp import mcp as nosible_mcp_server
 
 # Create a combined lifespan to manage the MCP session manager
@@ -23,6 +30,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["Mcp-Session-Id"],
 )
 
 # MCP well-known endpoint
@@ -38,7 +46,7 @@ async def oauth_protected_resource_metadata():
         "resource": settings.SCALEKIT_RESOURCE_NAME,
         "resource_documentation": settings.SCALEKIT_RESOURCE_DOCS_URL,
         "scopes_supported": [
-          "mcp:tools:search:read"
+          "mcp:tools:search"
         ],
     }
 

@@ -30,7 +30,7 @@ scalekit_client = ScalekitClient(
 # Authentication middleware
 class AuthMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        if request.url.path.startswith("/.well-known/"):
+        if request.url.path.startswith("/.well-known/") or request.url.path.startswith("/mcp"):
             return await call_next(request)
 
         try:
@@ -57,11 +57,12 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
             required_scopes = []
             if is_tool_call:
-                required_scopes = ["mcp:tools:search:read"]  # get required scope for your tool
+                required_scopes = ["mcp:tools:search"]  # get required scope for your tool
                 validation_options.required_scopes = required_scopes
 
             try:
-                scalekit_client.validate_access_token(token, options=validation_options)
+                scalekit_client.validate_token(token, options=validation_options)
+            #     validate_access_token
 
             except Exception as e:
                 raise HTTPException(status_code=401, detail="Token validation failed")
