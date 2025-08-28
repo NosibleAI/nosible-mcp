@@ -1,8 +1,9 @@
 import json
 import logging
+
 from fastapi import HTTPException, Request
-from fastapi.security import HTTPBearer
 from fastapi.responses import JSONResponse
+from fastapi.security import HTTPBearer
 from scalekit import ScalekitClient
 from scalekit.common.scalekit import TokenValidationOptions
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -19,20 +20,13 @@ logger = logging.getLogger(__name__)
 # Security scheme for Bearer token
 security = HTTPBearer()
 
-req = {
-  "SCALEKIT_ENVIRONMENT_URL": settings.SCALEKIT_ENVIRONMENT_URL,
-  "SCALEKIT_CLIENT_ID": settings.SCALEKIT_CLIENT_ID[:6] + "...",
-}
-for k,v in req.items():
-    if not v or (isinstance(v,str) and not v.strip()):
-        raise RuntimeError(f"{k} is empty at import time")
-
 # Initialize ScaleKit client
 scalekit_client = ScalekitClient(
     settings.SCALEKIT_ENVIRONMENT_URL,
     settings.SCALEKIT_CLIENT_ID,
     settings.SCALEKIT_CLIENT_SECRET
 )
+
 
 # Authentication middleware
 class AuthMiddleware(BaseHTTPMiddleware):

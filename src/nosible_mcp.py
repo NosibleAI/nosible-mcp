@@ -1,16 +1,11 @@
 from mcp.server.fastmcp import FastMCP
 
-from typing import Dict, List
-
-from config import settings
-
 # Create an MCP server
 mcp = FastMCP("web-search", streamable_http_path="/")
 
 
-# Add a tool that uses NOSIBLE
 @mcp.tool()
-def web_search_01(query: str) -> Dict:
+def web_search_01(query: str) -> dict:
     """
     Use Nosible to search the web for information.
 

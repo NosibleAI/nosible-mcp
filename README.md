@@ -20,3 +20,6 @@ Run:
 ```commandline
 python src/server.py
 ```
+
+Shoutout to [Alejandro AO's GitHub project](https://github.com/alejandro-ao) for helping me in developing
+this project.
