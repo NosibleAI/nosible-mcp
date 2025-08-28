@@ -2,27 +2,21 @@
 
 MCP server for the NOSIBLE Search API
 
-Usage with Claude Desktop:
-
-Example with my dir path, replace with your own: 
+Usage with Cursor:
 
 ```
 {
   "mcpServers": {
-    "nosible-mcp": {
-      "command": "uv",
-      "args": [
-        "--directory",
-        "C:\Users\RichardTaylor\Desktop\MCP\nosible-mcp", 
-        "run",
-        "main.py"
-      ]
+    "test-nosible": {
+      "url": "http://localhost:10000/mcp/",
+      "type": "http"
     }
   }
 }
+
 ```
 
-Run with inspector:
+Run:
 ```commandline
-uv run mcp dev nosible_mcp.py:mcp  
+python src/server.py
 ```
