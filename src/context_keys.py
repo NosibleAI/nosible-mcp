@@ -1,4 +1,3 @@
-# src/context_keys.py
 from contextvars import ContextVar
 
 # Holds the API key for *this* HTTP request only

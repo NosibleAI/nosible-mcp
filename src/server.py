@@ -1,5 +1,6 @@
 # src/server.py
 from __future__ import annotations
+
 import contextlib
 import os
 from pathlib import Path
@@ -9,17 +10,11 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
-# Load .env for PORT, etc.
-try:
-    from dotenv import load_dotenv
-    load_dotenv(Path(__file__).resolve().parent.parent / ".env")
-except Exception:
-    pass
-
 from context_keys import current_nosible_api_key
 from nosible_mcp import mcp as nosible_mcp_app
 
-PORT = int(os.getenv("PORT", "10000"))
+PORT = 10000
+HOST = "localhost"
 
 class PerUserKeyMiddleware(BaseHTTPMiddleware):
     """
@@ -68,7 +63,7 @@ mcp_http = nosible_mcp_app.streamable_http_app()
 app.mount("/mcp", mcp_http)  # final endpoint: http://127.0.0.1:10000/mcp/
 
 def main():
-    uvicorn.run(app, host="127.0.0.1", port=PORT, log_level="info")
+    uvicorn.run(app, host=HOST, port=PORT, log_level="info")
 
 if __name__ == "__main__":
     main()
