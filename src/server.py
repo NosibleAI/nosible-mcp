@@ -1,9 +1,6 @@
-# src/server.py
 from __future__ import annotations
 
 import contextlib
-import os
-from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI, Request
