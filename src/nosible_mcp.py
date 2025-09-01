@@ -145,7 +145,7 @@ def fast_search(
     try:
         # Prefer constructor param so we don't touch process-wide env
         with Nosible(nosible_api_key=key) as nos:
-            rs = nos.fast_search(
+            result = nos.fast_search(
                 question=question,
                 expansions=expansions,
                 n_results=n_results,
@@ -182,7 +182,7 @@ def fast_search(
                 iab_tier_4=iab_tier_4,
                 instruction=instruction,
             )
-            return rs.to_dict()
+            return result.to_dict()
 
     except Exception as e:
         return {"error": str(e)}
@@ -194,7 +194,7 @@ def scrape_url(
     recrawl: bool = False,
     render: bool = False,
     url: str = None
-) -> str:
+) -> dict:
     """
     Scrape a given URL and return a structured WebPageData object for the page.
 
@@ -211,7 +211,64 @@ def scrape_url(
 
     Returns
     -------
-    str
+    dict
         Structured page data object.
     """
+    # Lazy import keeps server startup instant
+    from nosible import Nosible
 
+    key = _get_key()
+    try:
+        # Prefer constructor param so we don't touch process-wide env
+        with Nosible(nosible_api_key=key) as nos:
+            result = nos.scrape_url(
+                html=html,
+                recrawl=recrawl,
+                render=render,
+                url=url,
+            )
+            return result.to_dict()
+
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@mcp.tool(name="topic-trend")
+def topic_trend(
+    query: str,
+    start_date: str = None,
+    end_date: str = None,
+) -> dict:
+    """
+    Extract a topic's trend showing the volume of news surrounding your query.
+
+    Parameters
+    ----------
+    query : str
+        The search term we would like to see a trend for.
+    start_date : str, optional
+        ISO‐format start date (YYYY-MM-DD) of the trend window.
+    end_date : str, optional
+        ISO‐format end date (YYYY-MM-DD) of the trend window.
+
+    Returns
+    -------
+    dict
+        The JSON-decoded topic trend data returned by the server.
+    """
+    # Lazy import keeps server startup instant
+    from nosible import Nosible
+
+    key = _get_key()
+    try:
+        # Prefer constructor param so we don't touch process-wide env
+        with Nosible(nosible_api_key=key) as nos:
+            result = nos.topic_trend(
+                query=query,
+                start_date=start_date,
+                end_date=end_date,
+            )
+            return result
+
+    except Exception as e:
+        return {"error": str(e)}
