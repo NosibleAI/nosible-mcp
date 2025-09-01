@@ -64,7 +64,7 @@ def fast_search(
     ----------
     question : str
         Query string.
-    expansions : list of str, optional
+    expansions : list of str
         Up to 10 semantically/lexically related queries to boost recall.
     n_results : int
         Max number of results (max 100).
@@ -83,60 +83,108 @@ def fast_search(
         Any result mentioning these strings will be excluded.
     autogenerate_expansions : bool
         Do you want to generate expansions automatically using a LLM?
-    publish_start : str, optional
+    publish_start : str
         Start date for when the document was published (ISO format).
-    publish_end : str, optional
+    publish_end : str
         End date for when the document was published (ISO format).
-    visited_start : str, optional
+    visited_start : str
         Start date for when the document was visited by NOSIBLE (ISO format).
-    visited_end : str, optional
+    visited_end : str
         End date for when the document was visited by NOSIBLE (ISO format).
-    certain : bool, optional
+    certain : bool
         Only include documents where we are 100% sure of the date.
-    include_netlocs : list of str, optional
+    include_netlocs : list of str
         List of netlocs (domains) to include in the search. (Max: 50)
-    exclude_netlocs : list of str, optional
+    exclude_netlocs : list of str
         List of netlocs (domains) to exclude in the search. (Max: 50)
-    include_companies : list of str, optional
+    include_companies : list of str
         Google KG IDs of public companies to require (Max: 50).
-    exclude_companies : list of str, optional
+    exclude_companies : list of str
         Google KG IDs of public companies to forbid (Max: 50).
-    include_docs : list of str, optional
+    include_docs : list of str
         URL hashes of docs to include (Max: 50).
-    exclude_docs : list of str, optional
+    exclude_docs : list of str
         URL hashes of docs to exclude (Max: 50).
-    brand_safety : str, optional
+    brand_safety : str
         Whether it is safe, sensitive, or unsafe to advertise on this content.
-    language : str, optional
+    language : str
         Language code to use in search (ISO 639-1 language code).
-    continent : str, optional
+    continent : str
         Continent the results must come from (e.g., "Europe", "Asia").
-    region : str, optional
+    region : str
         Region or subcontinent the results must come from (e.g., "Southern Africa", "Caribbean").
-    country : str, optional
+    country : str
         Country the results must come from.
-    sector : str, optional
+    sector : str
         Sector the results must relate to (e.g., "Energy", "Information Technology").
-    industry_group : str, optional
+    industry_group : str
         Industry group the results must relate to (e.g., "Automobiles & Components", "Insurance").
-    industry : str, optional
+    industry : str
         Industry the results must relate to (e.g., "Consumer Finance", "Passenger Airlines").
-    sub_industry : str, optional
+    sub_industry : str
         Sub-industry classification of the content's subject.
-    iab_tier_1 : str, optional
+    iab_tier_1 : str
         IAB Tier 1 category for the content.
-    iab_tier_2 : str, optional
+    iab_tier_2 : str
         IAB Tier 2 category for the content.
-    iab_tier_3 : str, optional
+    iab_tier_3 : str
         IAB Tier 3 category for the content.
-    iab_tier_4 : str, optional
+    iab_tier_4 : str
         IAB Tier 4 category for the content.
-    instruction : str, optional
+    instruction : str
         Instruction to use with the search query.
 
     Returns
     -------
-    JSON-serializable dict representation of Nosible ResultSet.
+    JSON-serializable dict representation of Nosible ResultSet that contains
+    (e.g. data.url gives the url of the result):
+
+    url : str
+        The URL of the search result.
+    title : str
+        The title of the search result.
+    description : str
+        A brief description or summary of the search result.
+    netloc : str
+        The network location (domain) of the URL.
+    published : str
+        The publication date of the search result.
+    visited : str
+        The date and time when the result was visited.
+    author : str
+        The author of the content.
+    content : str
+        The main content or body of the search result.
+    language : str
+        The language code of the content (e.g., ‘en’ for English).
+    similarity : float
+        Similarity score with respect to a query or reference.
+    brand_safety : str
+        Whether it is safe, sensitive, or unsafe to advertise on this content.
+    language : str
+        Language code to use in search (ISO 639-1 language code e.g. "en").
+    continent : str
+        Continent the results must come from (e.g., “Europe”, “Asia”).
+    region : str
+        Region or subcontinent the results must come from (e.g., “Southern Africa”, “Caribbean”).
+    country : str
+        Country the results must come from.
+    sector : str
+        GICS Sector the results must relate to (e.g., “Energy”, “Information Technology”).
+    industry_group : str
+        GICS Industry group the results must relate to (e.g., “Automobiles & Components”, “Insurance”).
+    industry : str
+        GICS Industry the results must relate to (e.g., “Consumer Finance”, “Passenger Airlines”).
+    sub_industry : str
+        GICS Sub-industry classification of the content’s subject.
+    iab_tier_1 : str
+        IAB Tier 1 category for the content.
+    iab_tier_2 : str
+        IAB Tier 2 category for the content.
+    iab_tier_3 : str
+        IAB Tier 3 category for the content.
+    iab_tier_4 : str
+        IAB Tier 4 category for the content.
     """
     # Lazy import keeps server startup instant
     from nosible import Nosible
@@ -211,8 +259,28 @@ def scrape_url(
 
     Returns
     -------
-    dict
-        Structured page data object.
+    A dict containing: (e.g. data.full_text returns the full text of the topic).
+
+    full_text : str
+        The full textual content of the web page, or None if not available
+    languages : dict
+        A dictionary mapping language codes to their probabilities or counts, representing detected languages.
+    metadata : dict
+        Metadata extracted from the web page, such as description, keywords, author, etc.
+    page : dict
+        Page-specific details, such as title, canonical URL, and other page-level information.
+    request : dict
+        Information about the HTTP request and response, such as headers, status code, and timing.
+    snippets : SnippetSet
+        A set of extracted text snippets or highlights from the page, wrapped in a SnippetSet object.
+    statistics: dict
+        Statistical information about the page, such as word count, sentence count, or other computed metrics.
+    structured : list
+        A list of structured data objects (e.g., schema.org, OpenGraph) extracted from the page.
+    url_tree: dict
+        A hierarchical representation of the URL structure, such as breadcrumbs or navigation paths.
+    companies : list
+        A list of companies extracted from the page.
     """
     # Lazy import keeps server startup instant
     from nosible import Nosible
@@ -246,15 +314,16 @@ def topic_trend(
     ----------
     query : str
         The search term we would like to see a trend for.
-    start_date : str, optional
+    start_date : str
         ISO‐format start date (YYYY-MM-DD) of the trend window.
-    end_date : str, optional
+    end_date : str
         ISO‐format end date (YYYY-MM-DD) of the trend window.
 
     Returns
     -------
-    dict
-        The JSON-decoded topic trend data returned by the server.
+    The JSON-decoded topic trend data returned by the server.
+
+    e.g. {'2005-01-31': ...'2020-12-31': ...}
     """
     # Lazy import keeps server startup instant
     from nosible import Nosible
