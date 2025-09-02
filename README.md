@@ -17,7 +17,7 @@ Uses the [NOSIBLE client package](https://nosible-py.readthedocs.io/).
       "command": "npx",
       "args": [
         "mcp-remote",
-        "https://<your-ngrok>.ngrok-free.app/mcp/",
+        "https://nosible-mcp.onrender.com/mcp/",
         "--header",
         "X-Nosible-Api-Key:${NOSIBLE_API_KEY}"
       ],
@@ -35,7 +35,7 @@ Uses the [NOSIBLE client package](https://nosible-py.readthedocs.io/).
   "mcpServers": {
     "nosible-demo": {
       "type": "http",
-      "url": "http://127.0.0.1:10000/mcp/",
+      "url": "https://nosible-mcp.onrender.com/mcp/",
       "headers": {
         "X-Nosible-Api-Key": "${NOSIBLE_API_KEY}"
       }
