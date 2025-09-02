@@ -8,13 +8,10 @@ from context_keys import current_nosible_api_key
 mcp = FastMCP("nosible-demo", streamable_http_path="/")
 
 
-def _get_key() -> str | dict:
+def _get_key() -> str:
     key =  current_nosible_api_key.get()
     if not key:
-        return {
-            "error": "missing_api_key",
-            "message": "Provide X-Nosible-Api-Key header in client config."
-        }
+        raise ValueError("missing_api_key: Provide X-Nosible-Api-Key header in client config.")
     else:
         return key
 
@@ -30,7 +27,6 @@ def fast_search(
     min_similarity: float = None,
     must_include: list[str] = None,
     must_exclude: list[str] = None,
-    autogenerate_expansions: bool = False,
     publish_start: str = None,
     publish_end: str = None,
     include_netlocs: list = None,
@@ -40,8 +36,6 @@ def fast_search(
     certain: bool = None,
     include_companies: list = None,
     exclude_companies: list = None,
-    include_docs: list = None,
-    exclude_docs: list = None,
     brand_safety: str = None,
     language: str = None,
     continent: str = None,
@@ -58,7 +52,8 @@ def fast_search(
     instruction: str = None,
 ) -> dict:
     """
-    Run a web search using the NOSIBLE search engine.
+    Run a web search using the NOSIBLE search engine. It is highly recommended to use
+    expansions to boost recall, along with your search.
 
     Parameters
     ----------
@@ -81,8 +76,6 @@ def fast_search(
         Only results mentioning these strings will be included.
     must_exclude : list of str
         Any result mentioning these strings will be excluded.
-    autogenerate_expansions : bool
-        Do you want to generate expansions automatically using a LLM?
     publish_start : str
         Start date for when the document was published (ISO format).
     publish_end : str
@@ -101,10 +94,6 @@ def fast_search(
         Google KG IDs of public companies to require (Max: 50).
     exclude_companies : list of str
         Google KG IDs of public companies to forbid (Max: 50).
-    include_docs : list of str
-        URL hashes of docs to include (Max: 50).
-    exclude_docs : list of str
-        URL hashes of docs to exclude (Max: 50).
     brand_safety : str
         Whether it is safe, sensitive, or unsafe to advertise on this content.
     language : str
@@ -185,6 +174,23 @@ def fast_search(
         IAB Tier 3 category for the content.
     iab_tier_4 : str
         IAB Tier 4 category for the content.
+
+    Examples
+    --------
+    {
+      "question": "European badger habitat",
+        "expansions": [
+            "European badger habitat requirements",
+            "Meles meles living environment",
+            "badger burrow habitat",
+            "European badger woodland habitat",
+            "badger sett location",
+            "European badger geographic range",
+            "badger habitat destruction",
+            "European badger conservation habitat"
+        ],
+      "n_results": 100,
+    }
     """
     # Lazy import keeps server startup instant
     from nosible import Nosible
@@ -203,7 +209,6 @@ def fast_search(
                 min_similarity=min_similarity,
                 must_include=must_include,
                 must_exclude=must_exclude,
-                autogenerate_expansions=autogenerate_expansions,
                 publish_start=publish_start,
                 publish_end=publish_end,
                 include_netlocs=include_netlocs,
@@ -213,8 +218,6 @@ def fast_search(
                 certain=certain,
                 include_companies=include_companies,
                 exclude_companies=exclude_companies,
-                include_docs=include_docs,
-                exclude_docs=exclude_docs,
                 brand_safety=brand_safety,
                 language=language,
                 continent=continent,

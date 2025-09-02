@@ -11,7 +11,7 @@ from context_keys import current_nosible_api_key
 from nosible_mcp import mcp as nosible_mcp_app
 
 PORT = 10000
-HOST = "localhost"
+HOST = "0.0.0.0"
 
 class PerUserKeyMiddleware(BaseHTTPMiddleware):
     """
