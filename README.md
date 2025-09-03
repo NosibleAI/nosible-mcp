@@ -9,16 +9,19 @@ Uses the [NOSIBLE client package](https://nosible-py.readthedocs.io/).
 
 ### Usage:
 
--Using with VSCode
-https://code.visualstudio.com/docs/copilot/customization/mcp-servers
-```
+- Log on to [NOSIBLE](https://www.nosible.ai/search-api) and retrieve your API key
+
+- Using with VSCode
+    - Create a `.vscode/mcp.json` file in your workspace.
+    - Select the `Add Server` button to add a template with your own API key for a new server. It should look like this:
+```json
 {
   "servers": {
     "nosible-demo": {
       "type": "http",
       "url": "https://nosible-mcp.onrender.com/mcp/",
       "headers": {
-        "X-Nosible-Api-Key": "${NOSIBLE_API_KEY}"
+        "X-Nosible-Api-Key": "YOUR_NOSIBLE_API_KEY_HERE"
       }
     }
   }
@@ -26,6 +29,8 @@ https://code.visualstudio.com/docs/copilot/customization/mcp-servers
 ```
 
 - Using with Claude Desktop:
+  - Go to `settings` -> `developer` -> `Edit config`
+  - Open `claude_desktop_config.json` and add the following code below, including your API key.
 ```json
 {
   "mcpServers": {
@@ -38,7 +43,7 @@ https://code.visualstudio.com/docs/copilot/customization/mcp-servers
         "X-Nosible-Api-Key:${NOSIBLE_API_KEY}"
       ],
       "env": {
-        "NOSIBLE_API_KEY": "your-real-key"
+        "NOSIBLE_API_KEY": "YOUR_NOSIBLE_API_KEY_HERE"
       }
     }
   }
@@ -46,6 +51,8 @@ https://code.visualstudio.com/docs/copilot/customization/mcp-servers
 ```
 
 - Using with Cursor:
+  - Go to `Cursor Settings` -> `MCP & Integrtions` -> `New MCP Server`
+  - Add this template below, with your own API key.
 ```json
 {
   "mcpServers": {
@@ -53,7 +60,7 @@ https://code.visualstudio.com/docs/copilot/customization/mcp-servers
       "type": "http",
       "url": "https://nosible-mcp.onrender.com/mcp/",
       "headers": {
-        "X-Nosible-Api-Key": "${NOSIBLE_API_KEY}"
+        "X-Nosible-Api-Key": "YOUR_NOSIBLE_API_KEY_HERE"
       }
     }
   }
@@ -61,6 +68,7 @@ https://code.visualstudio.com/docs/copilot/customization/mcp-servers
 ```
 
 ### Developer Usage
+
 Run the server:
 ```commandline
 python src/server.py
