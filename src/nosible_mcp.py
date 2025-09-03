@@ -199,15 +199,50 @@ async def fast_search(
     # 1) If needed, ask the *client LLM* for expansions
     if not expansions:
         prompt = f"""
-    Return a JSON object with a single key "expansions": an array of 10 strings.
-    Each string is a semantically similar search query to the user question, varied in phrasing,
-    scope, or facets (who/what/when/where/why/how, timeframes, synonyms, abbreviations, entities).
-    Keep each query brief (3–12 words). No numbering, no explanations, no markdown.
+        # TASK DESCRIPTION
 
-    User question: {question}
-    Output format (strict JSON):
-    {{"expansions": ["...", "...", "..."]}}
-    """.strip()
+        Given a search question you must generate a list of 10 similar questions that have the same exact
+        semantic meaning but are contextually and lexically different to improve search recall.
+
+        ## Question
+
+        Here is the question you must generate expansions for and the subject that it relates to:
+
+        Question: {question}
+
+        # RESPONSE FORMAT
+
+        Your response must be a JSON object structured as follows: a list of ten strings. Each string must
+        be a grammatically correct question that expands on the original question to improve recall.
+
+        [
+            string,
+            string,
+            string,
+            string,
+            string,
+            string,
+            string,
+            string,
+            string,
+            string
+        ]
+
+        # EXPANSION GUIDELINES
+
+        1. **Use specific named entities** - To improve the quality of your search results you must mention
+           specific named entities (people, locations, organizations, products, places) in expansions.
+
+        2. **Expansions must be highly targeted** - To improve the quality of search results each expansion
+           must be semantically unambiguous. Questions must be use between ten and fifteen words.
+
+        3. **Expansions must improve recall** - When expanding the question leverage semantic and contextual
+           expansion to maximize the ability of the search engine to find semantically relevant documents:
+
+           - Semantic Example: Swap "climate change" with "global warming" or "environmental change".
+           - Contextual Example: Swap "diabetes treatment" with "insulin therapy" or "blood sugar management".
+
+        """.replace("                ", "")
 
         try:
             resp = await ctx.sample(
