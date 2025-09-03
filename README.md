@@ -9,6 +9,22 @@ Uses the [NOSIBLE client package](https://nosible-py.readthedocs.io/).
 
 ### Usage:
 
+-Using with VSCode
+https://code.visualstudio.com/docs/copilot/customization/mcp-servers
+```
+{
+  "servers": {
+    "nosible-demo": {
+      "type": "http",
+      "url": "https://nosible-mcp.onrender.com/mcp/",
+      "headers": {
+        "X-Nosible-Api-Key": "${NOSIBLE_API_KEY}"
+      }
+    }
+  }
+}
+```
+
 - Using with Claude Desktop:
 ```json
 {
