@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import json
+
+from fastmcp import Context as ctx
 from mcp.server.fastmcp import FastMCP
 
 from context_keys import current_nosible_api_key
-
-from fastmcp import Context as ctx
 
 # MCP app; streamable HTTP endpoint will live at the mount path (see server.py)
 mcp = FastMCP("nosible-demo", streamable_http_path="/")
@@ -194,9 +195,6 @@ async def fast_search(
       "n_results": 100,
     }
     """
-    import json
-
-    # 1) If needed, ask the *client LLM* for expansions
     if not expansions:
         prompt = f"""
         # TASK DESCRIPTION
@@ -249,10 +247,9 @@ async def fast_search(
                 messages=prompt,
                 system_prompt="You generate search query expansions. Output strict JSON only.",
                 temperature=0.6,
-                max_tokens=400,
-                # Prefer fast/general models; client chooses the closest available one.
-                model_preferences={"speedPriority": 0.7, "costPriority": 0.5, "intelligencePriority": 0.5},
-            )  # ctx.sample is the server-side API to request client LLM sampling. :contentReference[oaicite:1]{index=1}
+                max_tokens=800,
+                model_preferences={"speedPriority": 0.6, "costPriority": 0.2, "intelligencePriority": 0.7},
+            )
             data = json.loads(resp.text)
             expansions = [s.strip() for s in data.get("expansions", []) if isinstance(s, str)]
         except Exception:
@@ -269,10 +266,6 @@ async def fast_search(
             if len(uniq) >= 10:
                 break
         expansions = uniq
-
-
-
-
 
     # Lazy import keeps server startup instant
     from nosible import Nosible

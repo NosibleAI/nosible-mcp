@@ -57,7 +57,7 @@ def healthz():
 
 # Mount the MCP streamable HTTP endpoint at /mcp/
 mcp_http = nosible_mcp_app.streamable_http_app()
-app.mount("/mcp", mcp_http)  # final endpoint: http://127.0.0.1:10000/mcp/
+app.mount("/mcp", mcp_http)
 
 def main():
     uvicorn.run(app, host=HOST, port=PORT, log_level="info")
