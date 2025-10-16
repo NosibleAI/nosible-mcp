@@ -16,7 +16,7 @@ HOST = "0.0.0.0"
 class PerUserKeyMiddleware(BaseHTTPMiddleware):
     """
     Pull 'X-Nosible-Api-Key' from the incoming request and stash it
-    in a ContextVar so tools can read it for *this* call only.
+    in a ContextVar so tools can read it for this call only.
     """
     async def dispatch(self, request: Request, call_next):
         key = (
@@ -31,7 +31,7 @@ class PerUserKeyMiddleware(BaseHTTPMiddleware):
 
 @contextlib.asynccontextmanager
 async def lifespan(app: FastAPI):
-    # manage MCP session manager lifecycle
+    # Manage MCP session manager lifecycle
     async with nosible_mcp_app.session_manager.run():
         yield
 

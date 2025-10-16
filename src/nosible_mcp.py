@@ -8,7 +8,7 @@ from mcp.server.fastmcp import FastMCP
 from context_keys import current_nosible_api_key
 
 # MCP app; streamable HTTP endpoint will live at the mount path (see server.py)
-mcp = FastMCP("nosible-demo", streamable_http_path="/")
+mcp = FastMCP("nosible-mcp", streamable_http_path="/")
 
 
 def _get_key() -> str:
@@ -37,8 +37,6 @@ async def fast_search(
     visited_start: str = None,
     visited_end: str = None,
     certain: bool = None,
-    include_companies: list = None,
-    exclude_companies: list = None,
     brand_safety: str = None,
     language: str = None,
     continent: str = None,
@@ -63,14 +61,14 @@ async def fast_search(
     question : str
         Query string.
     expansions : list of str
-        Up to 10 semantically/lexically related queries to boost recall.
+        Up to 10 semantically/lexically related queries to boost recall (max 10).
     n_results : int
         Max number of results (max 100).
     n_probes : int
-        Number of index shards to probe.
+        Number of index shards to probe (min 5, max 50).
         More shards will mean better recall, but slower query speeds.
     n_contextify : int
-        Context window size per result.
+        Context window size per result (min 128, max 1024).
     algorithm : str
         Search algorithm type.
     min_similarity : float
@@ -93,10 +91,6 @@ async def fast_search(
         List of netlocs (domains) to include in the search. (Max: 50)
     exclude_netlocs : list of str
         List of netlocs (domains) to exclude in the search. (Max: 50)
-    include_companies : list of str
-        Google KG IDs of public companies to require (Max: 50).
-    exclude_companies : list of str
-        Google KG IDs of public companies to forbid (Max: 50).
     brand_safety : str
         Whether it is safe, sensitive, or unsafe to advertise on this content.
     language : str
@@ -291,8 +285,6 @@ async def fast_search(
                 visited_start=visited_start,
                 visited_end=visited_end,
                 certain=certain,
-                include_companies=include_companies,
-                exclude_companies=exclude_companies,
                 brand_safety=brand_safety,
                 language=language,
                 continent=continent,

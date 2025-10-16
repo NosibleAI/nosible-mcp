@@ -17,7 +17,7 @@ Uses the [NOSIBLE client package](https://nosible-py.readthedocs.io/).
 ```json
 {
   "servers": {
-    "nosible-demo": {
+    "nosible-mcp": {
       "type": "http",
       "url": "https://nosible-mcp.onrender.com/mcp/",
       "headers": {
@@ -34,7 +34,7 @@ Uses the [NOSIBLE client package](https://nosible-py.readthedocs.io/).
 ```json
 {
   "mcpServers": {
-    "nosible-demo": {
+    "nosible-mcp": {
       "command": "npx",
       "args": [
         "mcp-remote",
@@ -56,7 +56,7 @@ Uses the [NOSIBLE client package](https://nosible-py.readthedocs.io/).
 ```json
 {
   "mcpServers": {
-    "nosible-demo": {
+    "nosible-mcp": {
       "type": "http",
       "url": "https://nosible-mcp.onrender.com/mcp/",
       "headers": {
