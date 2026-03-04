@@ -9,7 +9,12 @@ from mcp.server.transport_security import TransportSecuritySettings
 from context_keys import current_nosible_api_key
 
 # MCP app; streamable HTTP endpoint will live at the mount path (see server.py)
-mcp = FastMCP("nosible-mcp", streamable_http_path="/", transport_security=TransportSecuritySettings(enable_dns_rebinding_protection=False))
+mcp = FastMCP(
+    "nosible-mcp",
+    streamable_http_path="/",
+    stateless_http=True,
+    transport_security=TransportSecuritySettings(enable_dns_rebinding_protection=False),
+)
 
 
 def _get_key() -> str:
